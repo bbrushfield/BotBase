@@ -1,8 +1,5 @@
-https://discordapp.com/oauth2/authorize?client_id=653956128522371092&scope=bot&permissions=8 
 
-653956128522371092 CLIENT ID  
 
-NjUzOTU2MTI4NTIyMzcxMDky.Xe-iWw.I7vKHyYejFQvxZ2Watst-X1yJoM TOKEN
 
 
 module.exports = {
@@ -13,3 +10,4 @@ module.exports = {
 
     }
 }
+

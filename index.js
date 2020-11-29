@@ -2,6 +2,7 @@ const botconfig = require("./botconfig.json");
 const { Client, RichEmbed, Collection } = require("discord.js");
 const fs = require("fs");
 require ('dotenv/config');
+const Enmap = require('enmap')
 const http = require('http');
 const port = process.env.PORT || 3000; // Find the PORT or port 3000 if not
 //This is a simple server
@@ -18,7 +19,21 @@ const client = new Client({
 // For use with the commands handler to ensure aliases such as !training can also be used as !post
 client.commands = new Collection();
 client.aliases = new Collection();
+client.settings = new Enmap({
+    name: 'Settings',
+    fetchAll: false,
+    autoFetch: true,
+    cloneLevel: 'deep'
+});
 
+const defaultSettings = {
+    prefix: '>',
+    modLogChannel: 'mod-log',
+    modRole: 'Moderator',
+    adminRole: 'Administrator',
+    welcomeChannel: 'welcome',
+    welcomeMessage: 'Say hello to {{user}}, everyone!'
+}
 client.categories = fs.readdirSync("./commands/");
 
 
@@ -37,6 +52,25 @@ client.on("ready", () => {
         }
     }); 
 });
+
+client.on('guildDelete', guild => {
+    //When bot leaves, or is kicked, deletes entries
+    client.settings.delete(guild.id)
+})
+
+client.on('guildMemberAdd', member => {
+    //When player joins, welcomes them
+    client.settings.ensure(member.guild.id, defaultSettings);
+
+    let welcomeMessage = client.settings.get(member.guild.id, 'welcomeMessage')
+
+    welcomeMessage = welcomeMessage.replace('{{user}}', member.user.tag)
+
+    member.guild.channels.cache
+        .find('name', client.settings.get(member.guild.id, 'welcomeChannel'))
+        .send(welcomeMessage)
+        .catch(console.error);
+})
 
 client.on("message", async message => {
     const prefix = ">";
